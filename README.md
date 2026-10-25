@@ -1,5 +1,7 @@
 # BugNet
 
+![CI](https://github.com/JakeKing-Dev/bugnet/actions/workflows/ci.yml/badge.svg)
+
 **Your monitoring says the system is healthy. BugNet says whether its records are true.**
 
 It compares what a system recorded against a source the system does not write,
