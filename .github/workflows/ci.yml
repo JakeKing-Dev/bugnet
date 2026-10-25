@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: tests (py${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Run tests
+        run: PYTHONPATH=. python -m unittest discover -s tests -v
+
+  benchmark:
+    name: injected-fault benchmark
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Every injected fault detected, no false positives
+        run: python bench/benchmark.py --check
+
+  example:
+    name: pipeline example runs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: The skipped file is caught
+        run: |
+          out=$(python examples/pipeline.py)
+          echo "$out"
+          echo "$out" | grep -q "events-2026-10-20-07.jsonl" || { echo "example did not catch the skipped file"; exit 1; }
